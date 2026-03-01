@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "83655169564",
+    "project_id": "romegini",
+    "storage_bucket": "romegini.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83655169564:android:9cdb47210b9c431e0371d9",
+        "android_client_info": {
+          "package_name": "com.example.rome_gini"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4D4faEgi13Cl_pVbcZJWTP73Q-ks0_fY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
