@@ -1,73 +1,106 @@
 import 'package:flutter/material.dart';
 
-// ─────────────────────────────────────────────
-// COLOR PALETTE
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// ROAMGENIE — PREMIUM TRAVEL COLOR SYSTEM
+// Palette: Deep Ocean Navy · Sky Teal · Sunset Orange CTA · Off-white BG
+// ─────────────────────────────────────────────────────────────────────────────
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF0057FF);
-  static const Color primaryDark = Color(0xFF003DBF);
-  static const Color accent = Color(0xFF00C9A7);
-  static const Color accentLight = Color(0xFFE6FAF7);
+  // ── Brand primaries — Deep Ocean Blue
+  static const Color primary     = Color(0xFF0D47A1); // Deep ocean blue
+  static const Color primaryDark = Color(0xFF002171); // Navy dark
+  static const Color primaryLight= Color(0xFF5472D3); // Cornflower blue
 
-  static const Color background = Color(0xFFF5F7FA);
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceGrey = Color(0xFFF0F3F7);
+  // ── Accent — tropical teal / sky
+  static const Color accent      = Color(0xFF00BFA5); // Tropical teal
+  static const Color accentLight = Color(0xFFE0F7F4); // Teal tint
 
-  static const Color textPrimary = Color(0xFF0D1B2E);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textMuted = Color(0xFFADB5BD);
-  static const Color divider = Color(0xFFE8ECF0);
+  // ── CTA — warm sunset orange
+  static const Color sunset      = Color(0xFFFF6D00); // Warm sunset orange (CTA)
+  static const Color sunsetLight = Color(0xFFFFF0E5); // Sunset tint
+  static const Color gold        = Color(0xFFFFB300); // Golden amber
 
-  static const Color error = Color(0xFFE53935);
-  static const Color success = Color(0xFF1DB954);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color star = Color(0xFFF59E0B);
+  // ── Surfaces
+  static const Color background  = Color(0xFFF4F6FA); // Premium off-white bg
+  static const Color surface     = Color(0xFFFFFFFF);
+  static const Color surfaceGrey = Color(0xFFECF0F9); // Blue-tinted grey
+  static const Color card        = Color(0xFFFFFFFF);
 
+  // ── Text
+  static const Color textPrimary   = Color(0xFF0A1931); // Deep navy text
+  static const Color textSecondary = Color(0xFF546280); // Muted slate
+  static const Color textMuted     = Color(0xFFAAB4C8); // Lightest text
+  static const Color divider       = Color(0xFFE2E8F4); // Blue-tinted divider
+
+  // ── Semantic
+  static const Color error   = Color(0xFFD32F2F);
+  static const Color success = Color(0xFF00897B); // Teal-green success
+  static const Color warning = Color(0xFFFF8F00);
+  static const Color star    = Color(0xFFFFB300);
+
+  // ── Gradients
   static const LinearGradient heroGradient = LinearGradient(
-    colors: [Color(0xFF0057FF), Color(0xFF0099CC)],
+    colors: [Color(0xFF002171), Color(0xFF0D47A1), Color(0xFF1565C0)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient tealGradient = LinearGradient(
+    colors: [Color(0xFF00695C), Color(0xFF00BFA5)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient sunsetGradient = LinearGradient(
+    colors: [Color(0xFFE65100), Color(0xFFFF6D00)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient cardAccentGradient = LinearGradient(
-    colors: [Color(0xFF0057FF), Color(0xFF00C9A7)],
+    colors: [Color(0xFF0D47A1), Color(0xFF00BFA5)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+
+  static const LinearGradient skyGradient = LinearGradient(
+    colors: [Color(0xFF0D47A1), Color(0xFF1565C0), Color(0xFF1E88E5)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // SPACING
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 class AppSpacing {
   AppSpacing._();
 
-  static const double xs = 4.0;
-  static const double sm = 8.0;
-  static const double md = 16.0;
-  static const double lg = 24.0;
-  static const double xl = 32.0;
+  static const double xs  = 4.0;
+  static const double sm  = 8.0;
+  static const double md  = 16.0;
+  static const double lg  = 24.0;
+  static const double xl  = 32.0;
   static const double xxl = 48.0;
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // BORDER RADIUS
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 class AppRadius {
   AppRadius._();
 
-  static const double sm = 8.0;
-  static const double md = 12.0;
-  static const double lg = 16.0;
-  static const double xl = 24.0;
+  static const double sm   = 8.0;
+  static const double md   = 12.0;
+  static const double lg   = 16.0;
+  static const double xl   = 24.0;
   static const double full = 999.0;
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // TEXT STYLES
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 class AppTextStyles {
   AppTextStyles._();
 
@@ -120,9 +153,9 @@ class AppTextStyles {
   );
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // BOX DECORATIONS
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 class AppDecorations {
   AppDecorations._();
 
@@ -131,8 +164,8 @@ class AppDecorations {
     borderRadius: BorderRadius.circular(AppRadius.lg),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withValues(alpha: 0.06),
-        blurRadius: 16,
+        color: const Color(0xFF0B5FFF).withValues(alpha: 0.06),
+        blurRadius: 20,
         offset: const Offset(0, 4),
       ),
     ],

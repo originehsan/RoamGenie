@@ -20,38 +20,73 @@ class EmergencyScreen extends StatelessWidget {
   }
 }
 
-class _EmergencyBody extends StatelessWidget {
+class _EmergencyBody extends StatefulWidget {
   const _EmergencyBody();
+
+  @override
+  State<_EmergencyBody> createState() => _EmergencyBodyState();
+}
+
+class _EmergencyBodyState extends State<_EmergencyBody> {
+  final _scrollCtrl = ScrollController();
+  bool _isCollapsed = false;
+
+  static const double _expandedHeight = 200;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final threshold = _expandedHeight - kToolbarHeight - 20;
+    final collapsed = _scrollCtrl.hasClients && _scrollCtrl.offset > threshold;
+    if (collapsed != _isCollapsed) setState(() => _isCollapsed = collapsed);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.removeListener(_onScroll);
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
+        controller: _scrollCtrl,
         slivers: [
           // ── Dramatic hero AppBar ──────────────────────────────────────────
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: _expandedHeight,
             pinned: true,
             automaticallyImplyLeading: false,
-            backgroundColor: const Color(0xFFCC0000),
+            backgroundColor: const Color(0xFFB71C1C),
             scrolledUnderElevation: 0,
             surfaceTintColor: Colors.transparent,
+            title: AnimatedOpacity(
+              opacity: _isCollapsed ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 200),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.emergency_rounded,
+                      color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Text('Emergency Alerts',
+                      style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(
               collapseMode: CollapseMode.pin,
               background: _HeroHeader(),
-            ),
-            title: Row(
-              children: [
-                const Icon(Icons.emergency_rounded,
-                    color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Text('Emergency Alerts',
-                    style: GoogleFonts.outfit(
-                        color: Colors.white,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700)),
-              ],
             ),
           ),
 

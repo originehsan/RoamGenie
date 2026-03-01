@@ -80,7 +80,7 @@ class _TravelPlanScreenState extends State<TravelPlanScreen> {
         controller: _scrollController,
         slivers: [
           // ── SliverAppBar ───────────────────────────────────────────────────
-          const _AppBar(),
+          _AppBar(scrollController: _scrollController),
 
           // ── Body ───────────────────────────────────────────────────────────
           SliverToBoxAdapter(
@@ -253,17 +253,45 @@ class _TravelPlanScreenState extends State<TravelPlanScreen> {
     // Empty state
     return const KeyedSubtree(
       key: ValueKey('empty'),
-      child: _EmptyState(),
+      child: Center(child: _EmptyState()),
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// APP BAR
-// ─────────────────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────────────────────
+// APP BAR (scroll-aware: title fades in only when collapsed)
+// ───────────────────────────────────────────────────────────────────────────────
 
-class _AppBar extends StatelessWidget {
-  const _AppBar();
+class _AppBar extends StatefulWidget {
+  final ScrollController scrollController;
+  const _AppBar({required this.scrollController});
+
+  @override
+  State<_AppBar> createState() => _AppBarState();
+}
+
+class _AppBarState extends State<_AppBar> {
+  static const double _expandedHeight = 170;
+  bool _isCollapsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final threshold = _expandedHeight - kToolbarHeight - 20;
+    final collapsed = widget.scrollController.hasClients &&
+        widget.scrollController.offset > threshold;
+    if (collapsed != _isCollapsed) setState(() => _isCollapsed = collapsed);
+  }
+
+  @override
+  void dispose() {
+    widget.scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -271,143 +299,166 @@ class _AppBar extends StatelessWidget {
 
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 160,
-      backgroundColor: AppColors.primary,
+      expandedHeight: _expandedHeight,
+      backgroundColor: AppColors.primaryDark,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
+      // Title fades in ONLY when collapsed
+      title: AnimatedOpacity(
+        opacity: _isCollapsed ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 220),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.travel_explore_rounded,
+                color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Text('RoamGenie',
+                style: GoogleFonts.outfit(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
       actions: const [_ProfileAvatarButton(), SizedBox(width: 12)],
+      // Hero content in background — no FlexibleSpaceBar title
       flexibleSpace: FlexibleSpaceBar(
         collapseMode: CollapseMode.pin,
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0032CC), Color(0xFF0057FF), Color(0xFF00AAFF)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        background: _buildHero(userEmail),
+      ),
+    );
+  }
+
+  Widget _buildHero(String userEmail) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF002171), Color(0xFF0D47A1), Color(0xFF1565C0)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Decorative orbs
+          Positioned(
+            top: -30, right: -20,
+            child: Container(
+              width: 160, height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
             ),
           ),
-          child: Stack(
-            children: [
-              // Decorative orbs
-              Positioned(
-                top: -30, right: -20,
-                child: Container(
-                  width: 160, height: 160,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.05),
-                  ),
-                ),
+          Positioned(
+            bottom: -40, left: -20,
+            child: Container(
+              width: 130, height: 130,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.04),
               ),
-              Positioned(
-                bottom: -40, left: -20,
-                child: Container(
-                  width: 130, height: 130,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.04),
-                  ),
-                ),
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 72, 14),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 72, 14),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // App name with icon badge
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // App name
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 38, height: 38,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(11),
-                              border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.35),
-                                  width: 1.5),
-                            ),
-                            child: const Icon(Icons.travel_explore,
-                                color: Colors.white, size: 20),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'RoamGenie',
-                            style: GoogleFonts.outfit(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.4,
-                              height: 1.0,
-                            ),
-                          ),
-                        ],
-                      ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.2),
-
-                      const SizedBox(height: 6),
-
-                      // Typewriter subtitle
-                      AnimatedTextKit(
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            'AI-powered travel planning ✨',
-                            textStyle: GoogleFonts.outfit(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400),
-                            speed: const Duration(milliseconds: 55),
-                          ),
-                          TypewriterAnimatedText(
-                            'Flights · Hotels · Itinerary in seconds 🚀',
-                            textStyle: GoogleFonts.outfit(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400),
-                            speed: const Duration(milliseconds: 55),
-                          ),
-                        ],
-                        repeatForever: true,
-                        pause: const Duration(seconds: 2),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Email pill
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                        width: 38, height: 38,
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(11),
+                          border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.35),
+                              width: 1.5),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.mail_outline_rounded,
-                                color: Colors.white70, size: 11),
-                            const SizedBox(width: 5),
-                            Text(
-                              userEmail,
-                              style: GoogleFonts.outfit(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.0),
-                            ),
-                          ],
+                        child: const Icon(Icons.travel_explore,
+                            color: Colors.white, size: 20),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'RoamGenie',
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.4,
+                          height: 1.0,
                         ),
-                      ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
+                      ),
                     ],
+                  ).animate().fadeIn(duration: 600.ms).slideX(begin: -0.2),
+
+                  const SizedBox(height: 6),
+
+                  // Typewriter subtitle
+                  AnimatedTextKit(
+                    animatedTexts: [
+                      TypewriterAnimatedText(
+                        'AI-powered travel planning ✨',
+                        textStyle: GoogleFonts.outfit(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400),
+                        speed: const Duration(milliseconds: 55),
+                      ),
+                      TypewriterAnimatedText(
+                        'Flights · Hotels · Itinerary in seconds 🚀',
+                        textStyle: GoogleFonts.outfit(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400),
+                        speed: const Duration(milliseconds: 55),
+                      ),
+                    ],
+                    repeatForever: true,
+                    pause: const Duration(seconds: 2),
                   ),
-                ),
+
+                  const SizedBox(height: 8),
+
+                  // Email pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.mail_outline_rounded,
+                            color: Colors.white70, size: 11),
+                        const SizedBox(width: 5),
+                        Text(
+                          userEmail,
+                          style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              height: 1.0),
+                        ),
+                      ],
+                    ),
+                  ).animate(delay: 200.ms).fadeIn(duration: 400.ms),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -668,11 +719,11 @@ class _PlanAnotherButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-              colors: [Color(0xFF0032CC), Color(0xFF0057FF)]),
+              colors: [Color(0xFFE65100), Color(0xFFFF6D00)]),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: AppColors.sunset.withValues(alpha: 0.35),
                 blurRadius: 12,
                 offset: const Offset(0, 4)),
           ],
@@ -709,68 +760,74 @@ class _EmptyState extends StatelessWidget {
       ('🌆', 'City break'),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Big hero icon
-          Container(
-            width: 80, height: 80,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                  colors: [Color(0xFF0057FF), Color(0xFF00AAFF)]),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 24,
-                    spreadRadius: 4),
-              ],
-            ),
-            child: const Icon(Icons.flight_takeoff_rounded,
-                color: Colors.white, size: 38),
-          ).animate().scale(
-              begin: const Offset(0.5, 0.5),
-              curve: Curves.elasticOut,
-              duration: 800.ms).fadeIn(duration: 300.ms),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 380),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Big hero icon
+              Container(
+                width: 80, height: 80,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      colors: [Color(0xFF002171), Color(0xFF0D47A1)]),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 24,
+                        spreadRadius: 4),
+                  ],
+                ),
+                child: const Icon(Icons.flight_takeoff_rounded,
+                    color: Colors.white, size: 38),
+              ).animate().scale(
+                  begin: const Offset(0.5, 0.5),
+                  curve: Curves.elasticOut,
+                  duration: 800.ms).fadeIn(duration: 300.ms),
 
-          const SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-          Text('Where to next?',
-              style: GoogleFonts.outfit(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary))
-              .animate(delay: 150.ms).fadeIn(duration: 400.ms).slideY(begin: 0.2),
+              Text('Where to next?',
+                  style: GoogleFonts.outfit(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary))
+                  .animate(delay: 150.ms).fadeIn(duration: 400.ms).slideY(begin: 0.2),
 
-          const SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-          Text(
-            'Fill in the form above.\nOur AI will plan the perfect trip for you.',
-            style: GoogleFonts.outfit(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-                height: 1.6),
-            textAlign: TextAlign.center,
-          ).animate(delay: 250.ms).fadeIn(duration: 400.ms),
+              Text(
+                'Fill in the form above.\nOur AI will plan the perfect trip for you.',
+                style: GoogleFonts.outfit(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                    height: 1.6),
+                textAlign: TextAlign.center,
+              ).animate(delay: 250.ms).fadeIn(duration: 400.ms),
 
-          const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: ideas
-                .asMap()
-                .entries
-                .map((e) => _TripIdea(emoji: e.value.$1, label: e.value.$2)
-                    .animate(delay: (300 + e.key * 80).ms)
-                    .fadeIn(duration: 350.ms)
-                    .slideY(begin: 0.2))
-                .toList(),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: ideas
+                    .asMap()
+                    .entries
+                    .map((e) => _TripIdea(emoji: e.value.$1, label: e.value.$2)
+                        .animate(delay: (300 + e.key * 80).ms)
+                        .fadeIn(duration: 350.ms)
+                        .slideY(begin: 0.2))
+                    .toList(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

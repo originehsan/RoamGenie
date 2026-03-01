@@ -28,6 +28,7 @@ dependencies:
   animated_text_kit: ^4.2.2       # Typewriter & shine text animations
   url_launcher: ^6.3.1            # Open booking links, emails, phone
   glassmorphism: ^3.0.0           # Glassmorphism card effects
+  flutter_spinkit: ^5.2.2         # Modern loading animations (ripple, wave, etc.)
 
 dev_dependencies:
   flutter_test:

@@ -33,16 +33,29 @@ class _PassportBody extends StatefulWidget {
 class _PassportBodyState extends State<_PassportBody>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
+  final _scrollCtrl = ScrollController();
+  bool _isCollapsed = false;
+  static const double _expandedHeight = 180;
 
   @override
   void initState() {
     super.initState();
     _tabs = TabController(length: 2, vsync: this);
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final threshold = _expandedHeight - kToolbarHeight - 20;
+    final collapsed =
+        _scrollCtrl.hasClients && _scrollCtrl.offset > threshold;
+    if (collapsed != _isCollapsed) setState(() => _isCollapsed = collapsed);
   }
 
   @override
   void dispose() {
     _tabs.dispose();
+    _scrollCtrl.removeListener(_onScroll);
+    _scrollCtrl.dispose();
     super.dispose();
   }
 
@@ -52,52 +65,181 @@ class _PassportBodyState extends State<_PassportBody>
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        title: const Row(
-          children: [
-            Icon(Icons.book_rounded, color: AppColors.primary, size: 20),
-            SizedBox(width: 10),
-            Text('Visa Explorer',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 17,
-                    color: AppColors.textPrimary)),
-          ],
-        ),
-        actions: [
-          if (vm.state == PassportState.success)
-            TextButton(
-              onPressed: () => vm.reset(),
-              child: const Text('Reset',
-                  style: TextStyle(
-                      color: AppColors.primary, fontWeight: FontWeight.w600)),
+      body: CustomScrollView(
+        controller: _scrollCtrl,
+        slivers: [
+          // ── Hero SliverAppBar ─────────────────────────────────────────────
+          SliverAppBar(
+            expandedHeight: _expandedHeight,
+            pinned: true,
+            automaticallyImplyLeading: false,
+            backgroundColor: AppColors.primaryDark,
+            scrolledUnderElevation: 0,
+            surfaceTintColor: Colors.transparent,
+            // Title visible only when collapsed
+            title: AnimatedOpacity(
+              opacity: _isCollapsed ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 220),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.book_rounded,
+                      color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Text('Visa Explorer',
+                      style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700)),
+                ],
+              ),
             ),
-        ],
-        bottom: TabBar(
-          controller: _tabs,
-          labelColor: AppColors.primary,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.primary,
-          indicatorWeight: 2.5,
-          labelStyle: const TextStyle(
-              fontWeight: FontWeight.w700, fontSize: 13),
-          tabs: const [
-            Tab(icon: Icon(Icons.document_scanner_rounded, size: 18), text: 'Scan Passport'),
-            Tab(icon: Icon(Icons.public_rounded, size: 18), text: 'Select Country'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabs,
-        children: [
-          _ScanTab(vm: vm),
-          _ManualTab(vm: vm),
+            actions: [
+              if (vm.state == PassportState.success)
+                TextButton(
+                  onPressed: () => vm.reset(),
+                  child: Text('Reset',
+                      style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600)),
+                ),
+              const SizedBox(width: 8),
+            ],
+            // Hero in background only — no FlexibleSpaceBar title
+            flexibleSpace: FlexibleSpaceBar(
+              collapseMode: CollapseMode.pin,
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF002171), Color(0xFF0D47A1), Color(0xFF1565C0)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: -20, right: -20,
+                      child: Container(
+                        width: 150, height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.06),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -30, left: -20,
+                      child: Container(
+                        width: 120, height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.05),
+                        ),
+                      ),
+                    ),
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 48, 20, 16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 52, height: 52,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.35),
+                                    width: 1.5),
+                              ),
+                              child: const Icon(Icons.public_rounded,
+                                  color: Colors.white, size: 26),
+                            ).animate().scale(
+                                begin: const Offset(0.8, 0.8),
+                                curve: Curves.elasticOut,
+                                duration: 700.ms),
+                            const SizedBox(height: 10),
+                            Text('Visa Explorer 🌍',
+                                style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800))
+                                .animate(delay: 100.ms).fadeIn(duration: 400.ms),
+                            const SizedBox(height: 2),
+                            Text('Check visa-free countries for your passport',
+                                style: GoogleFonts.outfit(
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                    fontSize: 12))
+                                .animate(delay: 200.ms).fadeIn(duration: 400.ms),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Body ─────────────────────────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Tab bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceGrey,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: TabBar(
+                      controller: _tabs,
+                      indicator: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.12),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2)),
+                        ],
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      labelStyle: GoogleFonts.outfit(
+                          fontSize: 13, fontWeight: FontWeight.w700),
+                      unselectedLabelStyle:
+                          GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.w500),
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: AppColors.textSecondary,
+                      tabs: const [
+                        Tab(text: '📷  Scan Passport'),
+                        Tab(text: '🔍  Manual Lookup'),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Tab view content (fixed height)
+                  SizedBox(
+                    height: 900,
+                    child: TabBarView(
+                      controller: _tabs,
+                      children: [
+                        _ScanTab(vm: vm),
+                        _ManualTab(vm: vm),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -23,9 +23,27 @@ class _ContactScreenState extends State<ContactScreen> {
   final _lastNameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
+  final _scrollCtrl = ScrollController();
+  bool _isCollapsed = false;
+
+  static const double _expandedHeight = 200;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final threshold = _expandedHeight - kToolbarHeight - 20;
+    final collapsed = _scrollCtrl.hasClients && _scrollCtrl.offset > threshold;
+    if (collapsed != _isCollapsed) setState(() => _isCollapsed = collapsed);
+  }
 
   @override
   void dispose() {
+    _scrollCtrl.removeListener(_onScroll);
+    _scrollCtrl.dispose();
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _emailCtrl.dispose();
@@ -60,30 +78,36 @@ class _ContactScreenState extends State<ContactScreen> {
         builder: (ctx, vm, _) => Scaffold(
           backgroundColor: AppColors.background,
           body: CustomScrollView(
+            controller: _scrollCtrl,
             slivers: [
               // ── Hero AppBar ──────────────────────────────────────────────────
               SliverAppBar(
-                expandedHeight: 200,
+                expandedHeight: _expandedHeight,
                 pinned: true,
                 automaticallyImplyLeading: false,
-                backgroundColor: const Color(0xFF0057FF),
+                backgroundColor: AppColors.primaryDark,
                 scrolledUnderElevation: 0,
                 surfaceTintColor: Colors.transparent,
+                title: AnimatedOpacity(
+                  opacity: _isCollapsed ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.support_agent_rounded,
+                          color: Colors.white, size: 18),
+                      const SizedBox(width: 8),
+                      Text('Contact & Support',
+                          style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.pin,
                   background: _HeroHeader(),
-                ),
-                title: Row(
-                  children: [
-                    const Icon(Icons.support_agent_rounded,
-                        color: Colors.white, size: 18),
-                    const SizedBox(width: 8),
-                    Text('Contact & Support',
-                        style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700)),
-                  ],
                 ),
               ),
 
@@ -150,7 +174,7 @@ class _HeroHeader extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF0032CC), Color(0xFF0057FF), Color(0xFF0099CC)],
+          colors: [Color(0xFF002171), Color(0xFF0D47A1), Color(0xFF1565C0)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -364,8 +388,8 @@ class _FormCard extends StatelessWidget {
                   gradient: loading
                       ? null
                       : const LinearGradient(
-                          colors: [Color(0xFF003FCC), Color(0xFF0057FF),
-                              Color(0xFF0099CC)],
+                          colors: [Color(0xFFE65100), Color(0xFFFF6D00),
+                              Color(0xFFFF8A50)],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight),
                   color: loading ? AppColors.divider : null,
@@ -374,7 +398,7 @@ class _FormCard extends StatelessWidget {
                       ? null
                       : [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.35),
+                            color: AppColors.sunset.withValues(alpha: 0.4),
                             blurRadius: 14,
                             offset: const Offset(0, 5),
                           ),
